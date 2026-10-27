@@ -1,0 +1,21 @@
+import { chromium } from 'playwright'
+const browser = await chromium.launch()
+const page = await browser.newPage({ viewport: { width: 1440, height: 1000 }, deviceScaleFactor: 2 })
+await page.goto('http://localhost:5199/', { waitUntil: 'networkidle' })
+await page.evaluate(() => { localStorage.clear(); sessionStorage.clear() })
+await page.reload({ waitUntil: 'networkidle' })
+const shot = async (nav, name) => {
+  await page.locator('aside nav button', { hasText: nav }).first().click()
+  await page.waitForTimeout(600)
+  await page.screenshot({ path: `tests/shot-${name}.png` })
+}
+await shot('总时间轴', 'timeline')
+await shot('每日日志', 'daily')
+await shot('章节目录', 'syllabus')
+await shot('错题档案', 'wrong')
+await shot('月考分析', 'exam')
+await page.locator('aside button', { hasText: '数据备份' }).first().click()
+await page.waitForTimeout(400)
+await page.screenshot({ path: 'tests/shot-backup.png' })
+await browser.close()
+console.log('done')
